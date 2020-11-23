@@ -3,23 +3,15 @@
  * You can view component api by:
  * https://github.com/ant-design/ant-design-pro-layout
  */
-import ProLayout, {
-  MenuDataItem,
-  BasicLayoutProps as ProLayoutProps,
-  Settings,
-  DefaultFooter,
-  SettingDrawer,
-} from '@ant-design/pro-layout';
+import ProLayout, { DefaultFooter, SettingDrawer } from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Link, useIntl, connect, Dispatch, history } from 'umi';
+import { Link, useIntl, connect, history } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
-import { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 import logo from '../assets/logo.svg';
-
 const noMatch = (
   <Result
     status={403}
@@ -32,32 +24,17 @@ const noMatch = (
     }
   />
 );
-export interface BasicLayoutProps extends ProLayoutProps {
-  breadcrumbNameMap: {
-    [path: string]: MenuDataItem;
-  };
-  route: ProLayoutProps['route'] & {
-    authority: string[];
-  };
-  settings: Settings;
-  dispatch: Dispatch;
-}
-export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
-  breadcrumbNameMap: {
-    [path: string]: MenuDataItem;
-  };
-};
+
 /**
  * use Authorized check all menu item
  */
-
-const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
+const menuDataRender = (menuList) =>
   menuList.map((item) => {
     const localItem = {
       ...item,
       children: item.children ? menuDataRender(item.children) : undefined,
     };
-    return Authorized.check(item.authority, localItem, null) as MenuDataItem;
+    return Authorized.check(item.authority, localItem, null);
   });
 
 const defaultFooterDom = (
@@ -86,7 +63,7 @@ const defaultFooterDom = (
   />
 );
 
-const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
+const BasicLayout = (props) => {
   const {
     dispatch,
     children,
@@ -95,7 +72,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       pathname: '/',
     },
   } = props;
-  const menuDataRef = useRef<MenuDataItem[]>([]);
+  const menuDataRef = useRef([]);
   useEffect(() => {
     if (dispatch) {
       dispatch({
@@ -107,7 +84,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
    * init variables
    */
 
-  const handleMenuCollapse = (payload: boolean): void => {
+  const handleMenuCollapse = (payload) => {
     if (dispatch) {
       dispatch({
         type: 'global/changeLayoutCollapsed',
@@ -165,7 +142,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           return menuData || [];
         }}
       >
-        <Authorized authority={authorized!.authority} noMatch={noMatch}>
+        <Authorized authority={authorized.authority} noMatch={noMatch}>
           {children}
         </Authorized>
       </ProLayout>
@@ -182,7 +159,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings }: ConnectState) => ({
+export default connect(({ global, settings }) => ({
   collapsed: global.collapsed,
   settings,
 }))(BasicLayout);
