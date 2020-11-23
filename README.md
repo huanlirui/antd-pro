@@ -1,2 +1,0 @@
-# antd-pro
-ts learning
